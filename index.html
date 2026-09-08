@@ -21,9 +21,11 @@
         }
 
         h1 {
-          height: 50px;
+          height: 70px;
           line-height: 50px;
           text-align: center;
+          margin: 0;
+          padding: 20px 0 0;
         }
 
         div.workspace {
@@ -53,22 +55,46 @@
           overflow-y: auto;
         }
 
+        .tools {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 50px;
+          width: 100%;
+          z-index: 4;
+          background-color: var(--back);
+          border-bottom: 2px solid #ffffff22;
+        }
+
+        .ide {
+          position: absolute;
+          top: 50px;
+          left: 0;
+          width: 100%;
+          height: calc(100% - 50px);
+          overflow: auto;
+        }
+
         .code {
           position: absolute;
           outline: none;
           left: 50px;
-          opacity: 0.2;
+          top: 0;
+          color: #ffffff22;
           z-index: 2;
           white-space: pre;
           padding-right: 20px;
+          padding-bottom: 40px;
         }
 
         .coloured {
           position: absolute;
+          top: 0;
           left: 50px;
           z-index: 1;
           white-space: pre;
           padding-right: 20px;
+          padding-bottom: 40px;
         }
 
         .numbers {
@@ -80,6 +106,8 @@
           background-color: var(--back);
           text-align: right;
           padding-right: 5px;
+          color: #ffffff22;
+          user-select: none;
         }
 
         div.slider {
@@ -136,41 +164,12 @@
     <h1 id="title">C# Interpreter</h1>
     <div class="workspace">
       <div class="editor">
-        <div id="code" class="code" placeholder="Enter some code here" type="textarea" contenteditable>This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
-This C# interpreter is a little bit strange.
+        <div id="tools" class="tools">Hello</div>
+        <div id="ide" class="ide">
+          <div id="code" class="code" placeholder="Enter some code here" type="textarea" contenteditable>Starter code</div>
+          <div id="coloured" class="coloured"></div>
+          <div id="numbers" class="numbers"></div>
         </div>
-        <div id="coloured" class="coloured"></div>
-        <div id="numbers" class="numbers">001</div>
       </div>
       <div class="slider">
         <div class="slider-decor"></div>
@@ -207,7 +206,9 @@ This C# interpreter is a little bit strange.
         render(text);
       }));
 
-      for (let i = 0; i<1000; i++) {
+      render(document.getElementById("code").innerText);
+
+      for (let i = 1; i<=100; i++) {
         document.getElementById("numbers").innerHTML += i+"<br>";
       }
       
