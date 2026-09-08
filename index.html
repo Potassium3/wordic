@@ -18,6 +18,7 @@
           --blue: #03d3fc;
           --green: #08ff63;
           --red: #ff0038;
+          --yellow: #ffd700;
           --back: #241800;
         }
 
@@ -156,6 +157,17 @@
             z-index: 1000;
         }
 
+        button.square {
+          background-color: #ffffff22;
+          border-radius: 10px;
+          margin: 5px;
+          border: none;
+          width: 40px;
+          height: 40px;
+          color: white;
+          cursor: pointer;
+        }
+
         .tx-a {
           display: inline-block;
           color: var(--blue);
@@ -173,15 +185,25 @@
           color: var(--red);
           z-index: 2;
         }
+
+        .tx-d {
+          display: inline-block;
+          color: var(--yellow);
+          z-index: 2;
+        }
     </style>
   </head>
   <body>
     <h1 id="title">Code language</h1>
     <div class="workspace">
       <div class="editor">
-        <div id="tools" class="tools">Tools</div>
+        <div id="tools" class="tools">
+          <button class="square">
+            Run
+          </button>
+        </div>
         <div id="ide" class="ide">
-          <div id="code" class="code" placeholder="Enter some code here" type="textarea" contenteditable>note this is starter code
+          <div id="code" class="code" type="textarea" contenteditable>note this is starter code
 var a zero
 repeat 8
 set a plus a one
@@ -198,49 +220,62 @@ end</div>
     </div>
     <script>
 
-      let blue = ["var", "set", "while", "for", "search"];
-      let green = ["plus", "minus", "one", "zero", "not", "or", "and", "times", "over", "is", "in"];
-      let red = ["note"];
-
       function render(text) {
-        
-        let code = "";
+        const blue = ["var", "set", "while", "for", "search"];
+        const green = ["plus", "minus", "one", "zero", "not", "or", "and", "times", "over", "is", "in"];
+        const red = ["note"];
+        const yellow = ["loop", "end"]
+
         let line = "";
         let word = "";
-        let lineCount = 1;
         let include = false;
-        text += "\n";
-        document.getElementById("numbers").innerText = "1";
+        let lineCount = 0;
+        
+        document.getElementById("numbers").innerText = "";
+        document.getElementById("coloured").innerHTML = "";
         for (let char of text) {
           if (char == " " || char == "\n") {
             if (blue.includes(word)) {
-              code += `<span class="tx-a">${word}</span>`
+              line += `<span class="tx-a">${word}</span>`
             } else if (green.includes(word)) {
-              code += `<span class="tx-s">${word}</span>`
+              line += `<span class="tx-s">${word}</span>`
             } else if (red.includes(word)) {
-              code += `<span class="tx-f">${word}</span>`
+              line += `<span class="tx-f">${word}</span>`
+            } else if (yellow.includes(word)) {
+              line += `<span class="tx-d">${word}</span>`
             } else {
-              code += word;
+              line += word;
             }
 
-            code += char;
+            line += char;
             word = "";
           } else {
             word += char;
           }
           if (char == "\n") {
-            line = "";
             lineCount++;
+            document.getElementById("coloured").innerHTML += `<div>${line}</div>`;
             document.getElementById("numbers").innerHTML += `<br>${lineCount}`;
-          } else {
-            line += char;
+            line = "";
           }
         }
-        document.getElementById("coloured").innerHTML = code;
+
+        if (blue.includes(word)) {
+          line += `<span class="tx-a">${word}</span>`
+        } else if (green.includes(word)) {
+          line += `<span class="tx-s">${word}</span>`
+        } else if (red.includes(word)) {
+          line += `<span class="tx-f">${word}</span>`
+        } else if (yellow.includes(word)) {
+          line += `<span class="tx-d">${word}</span>`
+        } else {
+          line += word;
+        }
+        document.getElementById("coloured").innerHTML += `<div>${line}</div>`;
         
       }
 
-      document.getElementById("code").addEventListener("keyup", (function() {
+      document.getElementById("code").addEventListener("input", (function() {
         let text = this.innerText;
         render(text);
       }));
