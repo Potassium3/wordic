@@ -17,6 +17,7 @@
           height: 100%;
           --blue: #03d3fc;
           --green: #08ff63;
+          --red: #ff0038;
           --back: #241800;
         }
 
@@ -81,19 +82,26 @@
           left: 50px;
           top: 0;
           color: #ffffff22;
+          
           z-index: 2;
           white-space: pre;
           padding-right: 20px;
+          padding-left: 10px;
           padding-bottom: 40px;
+          
+          min-width: calc(100% - 50px);
+          min-height: 100%;
         }
 
         .coloured {
           position: absolute;
           top: 0;
           left: 50px;
+          
           z-index: 1;
           white-space: pre;
           padding-right: 20px;
+          padding-left: 10px;
           padding-bottom: 40px;
         }
 
@@ -101,12 +109,13 @@
           position: sticky;
           left: 0;
           width: 50px;
-          height: 1000px;
+          height: fit-content;
           z-index: 3;
           background-color: var(--back);
+          opacity: 0.95;
           text-align: right;
           padding-right: 5px;
-          color: #ffffff22;
+          color: #ffffff66;
           user-select: none;
         }
 
@@ -158,15 +167,26 @@
           color: var(--green);
           z-index: 2;
         }
+
+        .tx-f {
+          display: inline-block;
+          color: var(--red);
+          z-index: 2;
+        }
     </style>
   </head>
   <body>
-    <h1 id="title">C# Interpreter</h1>
+    <h1 id="title">Code language</h1>
     <div class="workspace">
       <div class="editor">
-        <div id="tools" class="tools">Hello</div>
+        <div id="tools" class="tools">Tools</div>
         <div id="ide" class="ide">
-          <div id="code" class="code" placeholder="Enter some code here" type="textarea" contenteditable>Starter code</div>
+          <div id="code" class="code" placeholder="Enter some code here" type="textarea" contenteditable>note this is starter code
+var a zero
+repeat 8
+set a plus a one
+out string a
+end</div>
           <div id="coloured" class="coloured"></div>
           <div id="numbers" class="numbers"></div>
         </div>
@@ -178,27 +198,46 @@
     </div>
     <script>
 
+      let blue = ["var", "set", "while", "for", "search"];
+      let green = ["plus", "minus", "one", "zero", "not", "or", "and", "times", "over", "is", "in"];
+      let red = ["note"];
+
       function render(text) {
-        newtext = "";
+        
+        let code = "";
+        let line = "";
+        let word = "";
+        let lineCount = 1;
         let include = false;
+        text += "\n";
+        document.getElementById("numbers").innerText = "1";
         for (let char of text) {
-          if (char == "<") {
-            include = true;
-            newtext += "<";
-          } else if (char == ">") {
-            include = false;
-            newtext += ">";
-          } else if (char == "a" && include) {
-            newtext += "<span class='tx-a'>a</span>";
-          } else if (char == "s" && include) {
-            newtext += "<span class='tx-s'>s</span>";
+          if (char == " " || char == "\n") {
+            if (blue.includes(word)) {
+              code += `<span class="tx-a">${word}</span>`
+            } else if (green.includes(word)) {
+              code += `<span class="tx-s">${word}</span>`
+            } else if (red.includes(word)) {
+              code += `<span class="tx-f">${word}</span>`
+            } else {
+              code += word;
+            }
+
+            code += char;
+            word = "";
           } else {
-            newtext += char;
+            word += char;
+          }
+          if (char == "\n") {
+            line = "";
+            lineCount++;
+            document.getElementById("numbers").innerHTML += `<br>${lineCount}`;
+          } else {
+            line += char;
           }
         }
-        text = newtext;
+        document.getElementById("coloured").innerHTML = code;
         
-        document.getElementById("coloured").innerHTML = text;
       }
 
       document.getElementById("code").addEventListener("keyup", (function() {
@@ -207,10 +246,6 @@
       }));
 
       render(document.getElementById("code").innerText);
-
-      for (let i = 1; i<=100; i++) {
-        document.getElementById("numbers").innerHTML += i+"<br>";
-      }
       
     </script>
   </body>
