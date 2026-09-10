@@ -6,6 +6,7 @@
         * {
           box-sizing: border-box;
           font-family: 'Roboto Mono', monospace;
+          font-size: 15pt;
           caret-color: white;
         }
         html, body {
@@ -25,6 +26,7 @@
         h1 {
           height: 70px;
           line-height: 50px;
+          font-size: 24pt !important;
           text-align: center;
           margin: 0;
           padding: 20px 0 0;
@@ -65,7 +67,6 @@
           width: 100%;
           z-index: 4;
           background-color: var(--back);
-          border-bottom: 2px solid #ffffff22;
         }
 
         .ide {
@@ -158,14 +159,20 @@
         }
 
         button.square {
-          background-color: #ffffff22;
+          background-color: transparent;
           border-radius: 10px;
           margin: 5px;
           border: none;
-          width: 40px;
+          min-width: 40px;
           height: 40px;
           color: white;
           cursor: pointer;
+          font-family: inherit;
+          padding: 0 10px;
+        }
+
+        button.square:hover {
+          background-color: #ffffff22;
         }
 
         .tx-a {
@@ -198,9 +205,10 @@
     <div class="workspace">
       <div class="editor">
         <div id="tools" class="tools">
-          <button class="square">
-            Run
-          </button>
+          <button class="square"><div class="tx-f">Commands</div></button>
+          <button class="square"><div class="tx-a">Operators</div></button>
+          <button class="square"><div class="tx-s">Selection</div></button>
+          <button class="square"><div class="tx-d">Iteration</div></button>
         </div>
         <div id="ide" class="ide">
           <div id="code" class="code" type="textarea" contenteditable>note this is starter code
