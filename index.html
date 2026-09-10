@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>C# Interpreter</title>
+    <title>Wordic Interpreter</title>
     <style>
         * {
           box-sizing: border-box;
@@ -20,7 +20,8 @@
           --green: #08ff63;
           --red: #ff0038;
           --yellow: #ffd700;
-          --back: #241800;
+          --grey: #2c2c2c;
+          --back: #131313;
         }
 
         h1 {
@@ -198,10 +199,16 @@
           color: var(--yellow);
           z-index: 2;
         }
+
+        .tx-b {
+          display: inline-block;
+          color: var(--grey);
+          z-index: 2;
+        }
     </style>
   </head>
   <body>
-    <h1 id="title">Code language</h1>
+    <h1 id="title">Wordic Interpreter</h1>
     <div class="workspace">
       <div class="editor">
         <div id="tools" class="tools">
@@ -209,14 +216,25 @@
           <button class="square"><div class="tx-a">Operators</div></button>
           <button class="square"><div class="tx-s">Selection</div></button>
           <button class="square"><div class="tx-d">Iteration</div></button>
+          <button class="square">Run</button>
         </div>
         <div id="ide" class="ide">
-          <div id="code" class="code" type="textarea" contenteditable>note this is starter code
-var a zero
-repeat 8
-set a plus a one
-out string a
-end</div>
+          <div id="code" class="code" type="textarea" contenteditable>note start typing no
+new a zero
+if equal a zero
+    set a one
+end
+array students 5
+count 5 i
+    replace students i one
+end
+set students join students wrap one
+out students
+new number times add zero minus one over two
+note this is -1/2
+function a nothing
+    note
+return nothing</div>
           <div id="coloured" class="coloured"></div>
           <div id="numbers" class="numbers"></div>
         </div>
@@ -228,11 +246,13 @@ end</div>
     </div>
     <script>
 
-      function render(text) {
-        const blue = ["var", "set", "while", "for", "search"];
-        const green = ["plus", "minus", "one", "zero", "not", "or", "and", "times", "over", "is", "in"];
-        const red = ["note"];
-        const yellow = ["loop", "end"]
+      function render(containertext) {
+        let text = containertext + "\n";
+        const blue = ["add", "minus", "times", "over", "div", "mod", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "wrap", "take", "replace", "steal", "length", "join"];
+        const green = ["in", "out", "new", "set", "array", "space", "newline", "tab", "alpha", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "nothing", "pi", "true", "case"];
+        const red = ["function", "process", "calc", "run", "return"];
+        const yellow = ["repeat", "while", "count", "search", "if"];
+        const grey = ["note", "end"];
 
         let line = "";
         let word = "";
@@ -241,8 +261,10 @@ end</div>
         
         document.getElementById("numbers").innerText = "1";
         document.getElementById("coloured").innerHTML = "";
+        let len = text.length;
+        let i = 0;
         for (let char of text) {
-          if (char == " " || char == "\n") {
+          if (char == " " || char == "\n" || i==len-1) {
             if (blue.includes(word)) {
               line += `<span class="tx-a">${word}</span>`
             } else if (green.includes(word)) {
@@ -251,6 +273,8 @@ end</div>
               line += `<span class="tx-f">${word}</span>`
             } else if (yellow.includes(word)) {
               line += `<span class="tx-d">${word}</span>`
+            } else if (grey.includes(word)) {
+              line += `<span class="tx-b">${word}</span>`
             } else {
               line += word;
             }
@@ -260,27 +284,14 @@ end</div>
           } else {
             word += char;
           }
-          if (char == "\n") {
+          if (char == "\n" || i==len-1) {
             lineCount++;
             document.getElementById("coloured").innerHTML += `<div>${line}</div>`;
             document.getElementById("numbers").innerHTML += `<br>${lineCount}`;
             line = "";
           }
+          i++;
         }
-
-        if (blue.includes(word)) {
-          line += `<span class="tx-a">${word}</span>`
-        } else if (green.includes(word)) {
-          line += `<span class="tx-s">${word}</span>`
-        } else if (red.includes(word)) {
-          line += `<span class="tx-f">${word}</span>`
-        } else if (yellow.includes(word)) {
-          line += `<span class="tx-d">${word}</span>`
-        } else {
-          line += word;
-        }
-        document.getElementById("coloured").innerHTML += `<div>${line}</div>`;
-        
       }
 
       document.getElementById("code").addEventListener("input", (function() {
