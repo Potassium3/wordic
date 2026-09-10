@@ -21,8 +21,8 @@
           --green: #08ff63;
           --red: #ff0038;
           --yellow: #ffd700;
-          --grey: #464646;
-          --back: #131313;
+          --grey: #4d575b;
+          --back: #2d2d2d;
         }
 
         h1 {
@@ -62,6 +62,9 @@
         }
 
         .tools {
+          display: flex;
+          justify-content: left;
+          gap: 5px;
           position: absolute;
           top: 0;
           left: 0;
@@ -69,6 +72,8 @@
           width: 100%;
           z-index: 4;
           background-color: var(--back);
+          overflow-x: auto;
+          box-shadow: 0px 0 5px black;
         }
 
         .ide {
@@ -87,6 +92,7 @@
           top: 0;
           width: fit-content;
           height: fit-content;
+          field-sizing: content;
           color: #ffffff22;
           background-color: transparent;
           
@@ -96,7 +102,7 @@
           border: none;
           padding-right: 20px;
           padding-left: 10px;
-          padding-bottom: 40px;
+          padding-bottom: 100px;
           padding-top: 0;
           
           min-width: calc(100% - 50px);
@@ -114,7 +120,7 @@
           white-space: pre;
           padding-right: 20px;
           padding-left: 10px;
-          padding-bottom: 40px;
+          padding-bottom: 100px;
           padding-top: 0;
         }
 
@@ -163,7 +169,6 @@
             flex-grow: 1;
             height: 100%;
             border-radius: 10px;
-            padding: 10px;
             margin: 0;
             outline: none;
             border: none;
@@ -175,11 +180,12 @@
         }
 
         button.square {
+          display: block;
           background-color: transparent;
           border-radius: 10px;
           margin: 5px;
           border: none;
-          min-width: 40px;
+          min-width: fit-content;
           height: 40px;
           color: white;
           cursor: pointer;
@@ -227,14 +233,14 @@
     <div class="workspace">
       <div class="editor">
         <div id="tools" class="tools">
-          <button class="square"><div class="tx-f">Commands</div></button>
+          <button class="square"><div class="tx-f">Functions</div></button>
           <button class="square"><div class="tx-a">Operators</div></button>
-          <button class="square"><div class="tx-s">Selection</div></button>
-          <button class="square"><div class="tx-d">Iteration</div></button>
-          <button class="square">Run</button>
+          <button class="square"><div class="tx-s">Variables</div></button>
+          <button class="square"><div class="tx-d">Constructs</div></button>
+          <button class="square">Identifiers</button>
         </div>
         <div id="ide" class="ide">
-          <textarea id="code" class="code" type="textarea" contenteditable>note start typing no
+          <textarea id="code" class="code" contenteditable>note start typing no
 new a zero
 if equal a zero
     set a one
@@ -257,13 +263,16 @@ return nothing</textarea>
       <div class="slider">
         <div class="slider-decor"></div>
       </div>
-      <div class="output">Output here</div>
+      <div class="output">
+        <button class="square">Run</button>
+        Output here
+      </div>
     </div>
     <script>
 
       function render(containertext) {
         let text = containertext + "\n";
-        const blue = ["add", "minus", "times", "over", "div", "mod", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "wrap", "take", "replace", "steal", "length", "join"];
+        const blue = ["add", "minus", "times", "over", "div", "mod", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "wrap", "take", "replace", "steal", "length", "join", "string", "noted"];
         const green = ["in", "out", "new", "set", "array", "space", "newline", "tab", "alpha", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "nothing", "pi", "true", "case"];
         const red = ["function", "process", "calc", "run"];
         const yellow = ["repeat", "while", "count", "search", "if"];
@@ -272,10 +281,9 @@ return nothing</textarea>
         let line = "";
         let word = "";
         let include = false;
-        let lineCount = 1;
+        let lineCount = 0;
         
-        document.getElementById("numbers").innerHTML = "1";
-        document.getElementById("coloured").innerHTML = "";
+        let previousLineCount = document.getElementById("numbers").dataLines || 0;
         let len = text.length;
         let i = 0;
         for (let char of text) {
@@ -302,12 +310,28 @@ return nothing</textarea>
           }
           if (char == "\n" || i==len-1) {
             lineCount++;
-            document.getElementById("coloured").innerHTML += `<div>${line}</div>`;
-            document.getElementById("numbers").innerHTML += `<br>${lineCount}`;
+            if (document.getElementById(`line-${lineCount}`)) {
+              if (document.getElementById(`line-${lineCount}`).innerHTML != line) {
+                document.getElementById(`line-${lineCount}`).innerHTML = line;
+              }
+            } else {
+              document.getElementById("coloured").innerHTML += `<div id="line-${lineCount}">${line}</div>`;
+            }
+            if (lineCount > previousLineCount) {
+              document.getElementById("numbers").innerHTML += `<div id="number-${lineCount}">${lineCount}</div>`;
+            }
             line = "";
           }
           i++;
         }
+
+        document.getElementById("numbers").dataLines = lineCount;
+        while (previousLineCount > lineCount) {
+          document.getElementById(`number-${previousLineCount}`).remove();
+          document.getElementById(`line-${lineCount+1}`).remove();
+          previousLineCount--;
+        }
+        document.getElementById("numbers").dataLines = lineCount;
       }
 
       document.getElementById("code").addEventListener("input", (function() {
