@@ -7,6 +7,7 @@
           box-sizing: border-box;
           font-family: 'Roboto Mono', monospace;
           font-size: 15pt;
+          line-height: 22px;
           caret-color: white;
         }
         html, body {
@@ -20,7 +21,7 @@
           --green: #08ff63;
           --red: #ff0038;
           --yellow: #ffd700;
-          --grey: #2c2c2c;
+          --grey: #464646;
           --back: #131313;
         }
 
@@ -84,13 +85,19 @@
           outline: none;
           left: 50px;
           top: 0;
+          width: fit-content;
+          height: fit-content;
           color: #ffffff22;
+          background-color: transparent;
           
           z-index: 2;
           white-space: pre;
+          margin: 0;
+          border: none;
           padding-right: 20px;
           padding-left: 10px;
           padding-bottom: 40px;
+          padding-top: 0;
           
           min-width: calc(100% - 50px);
           min-height: 100%;
@@ -100,12 +107,20 @@
           position: absolute;
           top: 0;
           left: 50px;
+          width: fit-content;
+          height: fit-content;
           
           z-index: 1;
           white-space: pre;
           padding-right: 20px;
           padding-left: 10px;
           padding-bottom: 40px;
+          padding-top: 0;
+        }
+
+        .coloured>div {
+          display: block;
+          min-height: 22px;
         }
 
         .numbers {
@@ -219,7 +234,7 @@
           <button class="square">Run</button>
         </div>
         <div id="ide" class="ide">
-          <div id="code" class="code" type="textarea" contenteditable>note start typing no
+          <textarea id="code" class="code" type="textarea" contenteditable>note start typing no
 new a zero
 if equal a zero
     set a one
@@ -234,7 +249,7 @@ new number times add zero minus one over two
 note this is -1/2
 function a nothing
     note
-return nothing</div>
+return nothing</textarea>
           <div id="coloured" class="coloured"></div>
           <div id="numbers" class="numbers"></div>
         </div>
@@ -250,16 +265,16 @@ return nothing</div>
         let text = containertext + "\n";
         const blue = ["add", "minus", "times", "over", "div", "mod", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "wrap", "take", "replace", "steal", "length", "join"];
         const green = ["in", "out", "new", "set", "array", "space", "newline", "tab", "alpha", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "nothing", "pi", "true", "case"];
-        const red = ["function", "process", "calc", "run", "return"];
+        const red = ["function", "process", "calc", "run"];
         const yellow = ["repeat", "while", "count", "search", "if"];
-        const grey = ["note", "end"];
+        const grey = ["note", "end", "return"];
 
         let line = "";
         let word = "";
         let include = false;
         let lineCount = 1;
         
-        document.getElementById("numbers").innerText = "1";
+        document.getElementById("numbers").innerHTML = "1";
         document.getElementById("coloured").innerHTML = "";
         let len = text.length;
         let i = 0;
@@ -278,8 +293,9 @@ return nothing</div>
             } else {
               line += word;
             }
-
-            line += char;
+            if (char == " ") {
+              line += char;
+            }
             word = "";
           } else {
             word += char;
@@ -295,11 +311,9 @@ return nothing</div>
       }
 
       document.getElementById("code").addEventListener("input", (function() {
-        let text = this.innerText;
-        render(text);
+        render(this.value);
       }));
-
-      render(document.getElementById("code").innerText);
+      render(document.getElementById("code").value);
       
     </script>
   </body>
