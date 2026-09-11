@@ -1,12 +1,3 @@
-
-
-
-
-// Please fix the error where the variables object is {} and the runLine doesn't seem to run.
-
-
-
-
 const operators = {
     "not": {
         inputs: 1,
@@ -20,15 +11,23 @@ const commands = {
     "new": {
         inputs: 2,
         run: function(args, variables) {
-            variables[args[0]] = args[1];
-            console.log(variables);
-            return variables
+            variables[args[0]] = parseWord(args[1], variables);
+            return variables, "";
         }
-    }
+    },
+    "set": {
+        inputs: 2,
+        run: function(args, variables) {
+            variables[args[0]] = parseWord(args[1], variables);
+            return variables, "";
+        }
+    },
 }
 
 const constants = {
     "true": true,
+    "zero": 0,
+    "one": 1,
 }
 
 function parseWord(word, variables) {
@@ -52,16 +51,19 @@ function runLine(line, variables) {
     let output = "";
     console.log(line);
     if (principalCommand in commands) {
+        console.log("principal recognised"+principalCommand);
         let args = Array(line.length-1);
         let i = 0;
         for (let word of line) {
             if (i != 0) {
-                args[i-1] = parseWord(word, variables); // Parses variable names, constants, etc.
+                args[i-1] = word; // Formats words into list
             }
             i++;
         }
-        console.log(args);
-        newVariables = commands[principalCommand].run(args); // Runs the line
+        console.log("Args: "+args);
+        let result = commands[principalCommand].run(args, variables); // Runs the line
+        variables = result[0];
+        output += result[1] == "" ? "" : result[1];
     }
     return { variables: newVariables, output };
 }
