@@ -264,10 +264,11 @@ return nothing</textarea>
         <div class="slider-decor"></div>
       </div>
       <div class="output">
-        <button class="square">Run</button>
-        Output here
+        <button id="run" class="square">Run</button>
+        <div id="output-value"></div>
       </div>
     </div>
+    <script src="interpreter.js"></script>
     <script>
 
       function render(containertext) {
@@ -326,9 +327,7 @@ return nothing</textarea>
         }
 
         document.getElementById("numbers").dataLines = lineCount;
-        console.log("EDIT: "+previousLineCount+" to "+lineCount);
         while (previousLineCount > lineCount) {
-          console.log("removing line"+(previousLineCount+1));
           document.getElementById(`number-${previousLineCount}`).remove();
           document.getElementById(`line-${previousLineCount}`).remove();
           previousLineCount--;
@@ -340,6 +339,10 @@ return nothing</textarea>
         render(this.value);
       }));
       render(document.getElementById("code").value);
+
+      document.getElementById("run").addEventListener("click", (function() {
+        document.getElementById("output-value").innerText = run(document.getElementById("code").value);
+      }));
       
     </script>
   </body>
