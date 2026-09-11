@@ -22,7 +22,10 @@
           --red: #ff0038;
           --yellow: #ffd700;
           --grey: #4d575b;
+          --brown: #ffcb90;
           --back: #2d2d2d;
+
+          --tool-height: 50px;
         }
 
         h1 {
@@ -45,8 +48,8 @@
         }
 
         div.editor {
+          width: 62vw;
           position: relative;
-          flex-grow: 2;
           height: 100%;
           border-radius: 10px;
           margin: 0;
@@ -68,7 +71,7 @@
           position: absolute;
           top: 0;
           left: 0;
-          height: 50px;
+          height: var(--tool-height);
           width: 100%;
           z-index: 4;
           background-color: var(--back);
@@ -78,10 +81,10 @@
 
         .ide {
           position: absolute;
-          top: 50px;
+          top: var(--tool-height);
           left: 0;
           width: 100%;
-          height: calc(100% - 50px);
+          height: calc(100% - var(--tool-height));
           overflow: auto;
         }
 
@@ -166,17 +169,21 @@
         }
 
         div.output {
-            flex-grow: 1;
-            height: 100%;
-            border-radius: 10px;
-            margin: 0;
-            outline: none;
-            border: none;
-            resize: none;
-            color: white;
-            background-color: var(--back);
-            font-size: 15pt;
-            z-index: 1000;
+          height: 100%;
+          border-radius: 10px;
+          margin: 0;
+          outline: none;
+          border: none;
+          resize: none;
+          color: white;
+          background-color: var(--back);
+          font-size: 15pt;
+          z-index: 1000;
+          flex-grow: 1;
+        }
+
+        div.output-value {
+          padding: 15px;
         }
 
         button.square {
@@ -226,6 +233,12 @@
           color: var(--grey);
           z-index: 2;
         }
+
+        .tx-g {
+          display: inline-block;
+          color: var(--brown);
+          z-index: 2;
+        }
     </style>
   </head>
   <body>
@@ -233,29 +246,16 @@
     <div class="workspace">
       <div class="editor">
         <div id="tools" class="tools">
-          <button class="square"><div class="tx-f">Functions</div></button>
+          <button class="square">Names</button>
+          <button class="square"><div class="tx-s">Commands</div></button>
           <button class="square"><div class="tx-a">Operators</div></button>
-          <button class="square"><div class="tx-s">Variables</div></button>
+          <button class="square"><div class="tx-g">Constants</div></button>
           <button class="square"><div class="tx-d">Constructs</div></button>
-          <button class="square">Identifiers</button>
+          <button class="square"><div class="tx-f">Functions</div></button>
+          <button class="square"><div class="tx-b">Comments</div></button>
         </div>
         <div id="ide" class="ide">
-          <textarea id="code" class="code" contenteditable>note start typing no
-new a zero
-if equal a zero
-    set a one
-end
-array students 5
-count 5 i
-    replace students i one
-end
-set students join students wrap one
-out students
-new number times add zero minus one over two
-note this is -1/2
-function a nothing
-    note
-return nothing</textarea>
+          <textarea id="code" class="code" contenteditable>note start typing here</textarea>
           <div id="coloured" class="coloured"></div>
           <div id="numbers" class="numbers"></div>
         </div>
@@ -265,7 +265,7 @@ return nothing</textarea>
       </div>
       <div class="output">
         <button id="run" class="square">Run</button>
-        <div id="output-value"></div>
+        <div id="output-value" class="output-value"></div>
       </div>
     </div>
     <script src="interpreter.js"></script>
@@ -274,10 +274,11 @@ return nothing</textarea>
       function render(containertext) {
         let text = containertext + "\n";
         const blue = ["add", "minus", "times", "over", "div", "mod", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "wrap", "take", "replace", "steal", "length", "join", "string", "noted"];
-        const green = ["in", "out", "new", "set", "array", "space", "newline", "tab", "alpha", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "nothing", "pi", "true", "case"];
-        const red = ["function", "process", "calc", "run"];
+        const green = ["in", "out", "new", "set", "array"];
+        const red = ["function", "process", "calc", "run", "return"];
         const yellow = ["repeat", "while", "count", "search", "if"];
-        const grey = ["note", "end", "return"];
+        const grey = ["note", "end"];
+        const brown = ["space", "newline", "tab", "alpha", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "nothing", "pi", "true", "case"];
 
         let line = "";
         let word = "";
@@ -299,6 +300,8 @@ return nothing</textarea>
               line += `<span class="tx-d">${word}</span>`
             } else if (grey.includes(word)) {
               line += `<span class="tx-b">${word}</span>`
+            } else if (brown.includes(word)) {
+              line += `<span class="tx-g">${word}</span>`
             } else {
               line += word;
             }
@@ -333,6 +336,10 @@ return nothing</textarea>
           previousLineCount--;
         }
         document.getElementById("numbers").dataLines = lineCount;
+
+        if (containertext == "") {
+          document.getElementById("coloured").innerHTML = `<div id="line-1"><span class="tx-b">Start typing here</span></div>`;
+        }
       }
 
       document.getElementById("code").addEventListener("input", (function() {
@@ -341,7 +348,7 @@ return nothing</textarea>
       render(document.getElementById("code").value);
 
       document.getElementById("run").addEventListener("click", (function() {
-        document.getElementById("output-value").innerText = run(document.getElementById("code").value);
+        document.getElementById("output-value").innerText = run(document.getElementById("code").value+"\n");
       }));
       
     </script>
