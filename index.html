@@ -326,9 +326,11 @@ return nothing</textarea>
         }
 
         document.getElementById("numbers").dataLines = lineCount;
+        console.log("EDIT: "+previousLineCount+" to "+lineCount);
         while (previousLineCount > lineCount) {
+          console.log("removing line"+(previousLineCount+1));
           document.getElementById(`number-${previousLineCount}`).remove();
-          document.getElementById(`line-${lineCount+1}`).remove();
+          document.getElementById(`line-${previousLineCount}`).remove();
           previousLineCount--;
         }
         document.getElementById("numbers").dataLines = lineCount;
