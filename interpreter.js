@@ -10,6 +10,7 @@ const operators = {
 const commands = {
     "new": {
         inputs: 2,
+        evaluatingInputs: [false, true],
         run: function(args, variables) {
             let newVariables = variables;
             newVariables[args[0]] = parseWord(args[1], variables);
@@ -59,11 +60,41 @@ function parseWord(word, variables) {
 
 // Recursive
 function evaluate(arg) {
+    // Identifier -> identifier
+    // Operator+value -> value
+    // Value -> value
+    // Operator+identifier -> value?
     console.log("evaluating:"+arg);
+
     if (arg.length == 1) {
-        return arg[0]; // Error undefined
+        // Return the single text value
+        return parseWord(arg[0]);
     } else {
-        return 0;
+        let args = [];
+        if (arg[0] in operators) {
+            // Split the words into sections, and evaluate each section
+            let operator = operators[arg[0]];
+            let expectedArgs = operator.inputs;
+            let initialArgs = expectedArgs; // Simply a formula thing
+            let allArgsBefore = [];
+            for (let word of arg) {
+                allArgsBefore.push(word); // Keep track of arguments
+                if (word in operators) {
+                    expectedArgs = operators[word].inputs - 1; // Additional argument expected (minus operator, which takes up one word)
+                } else {
+                    if (expectedArgs < initialArgs) {
+                        // As soon as one whole argument is ended, store in args
+                        initialArgs = expectedArgs;
+                        args.push(evaluate(allArgsBefore));
+                        allArgsBefore = [];
+                    }
+                    expectedArgs--;
+                }
+            }
+
+            // Return the operator's calculation
+            return operator.evaluate(args);
+        }
     }
 }
 
@@ -73,7 +104,7 @@ function runLine(line, variables) {
     let output = "";
     if (principalCommand in commands) {
         let command = commands[principalCommand];
-        
+
         // Format arguments to principal command (first of line)
         let args = [];
         let expectedArgs = command.inputs; // Keep track of how many args needed
@@ -99,8 +130,6 @@ function runLine(line, variables) {
             }
             i++;
         }
-        // If expected args != 0 error invalid argument format
-        console.log("Args: "+args);
 
         // Run command
         let result = command.run(args, variables); // Runs the line
