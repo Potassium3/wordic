@@ -57,11 +57,13 @@ function parseWord(word, variables) {
     }
 }
 
-// Make a parseWordsIntoStructuredList function to structure the operators (no, using recursion)
-// Pass this into evaluate at each level
-
-function evaluate(args) {
-    return 0;
+// Recursive
+function evaluate(arg) {
+    if (arg.length == 1) {
+        return arg[0]; // Error undefined
+    } else {
+        return 0;
+    }
 }
 
 function runLine(line, variables) {
@@ -75,13 +77,14 @@ function runLine(line, variables) {
         let args = [];
         let expectedArgs = command.inputs; // Keep track of how many args needed
         console.log("Initial expected: "+expectedArgs);
-        let initialArgs = expectedArgs;
+        let initialArgs = expectedArgs+1;
         let i = 0;
         for (let word of line) {
             if (i != 0) {
                 if (word in operators) {
                     expectedArgs += operators[word].inputs - 1; // Additional args expected - operator
                 } else {
+                    console.log("initial:"+initialArgs+" expected:"+expectedArgs);
                     if (expectedArgs < initialArgs) {
                         initialArgs = expectedArgs;
                         
