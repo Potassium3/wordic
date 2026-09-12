@@ -8,8 +8,92 @@ const operators = {
     "add": {
         inputs: 2,
         evaluate: function (args) {
-            console.log("ADD CALLED WITH: "+args);
             return args[0]+args[1];
+        },
+    },
+    "minus": {
+        inputs: 1,
+        evaluate: function (args) {
+            return -args[0];
+        },
+    },
+    "times": {
+        inputs: 2,
+        evaluate: function (args) {
+            return args[0]*args[1];
+        },
+    },
+    "over": {
+        inputs: 1,
+        evaluate: function (args) {
+            return 1/args[0];
+        },
+    },
+    "round": {
+        inputs: 1,
+        evaluate: function (args) {
+            return args[0]%1;
+        },
+    },
+    "decimal": {
+        inputs: 1,
+        evaluate: function (args) {
+            return args[0]%1;
+        },
+    },
+    "exp": {
+        inputs: 2,
+        evaluate: function (args) {
+            return args[0]**args[1];
+        },
+    },
+    "equal": {
+        // Array modification required
+        inputs: 2,
+        evaluate: function (args) {
+            return args[0]==args[1];
+        },
+    },
+    "up": {
+        inputs: 2,
+        evaluate: function (args) {
+            return args[0]<args[1];
+        },
+    },
+    "down": {
+        inputs: 2,
+        evaluate: function (args) {
+            return args[0]>args[1];
+        },
+    },
+    "or": {
+        inputs: 2,
+        evaluate: function (args) {
+            return args[0] || args[1];
+        },
+    },
+    "and": {
+        inputs: 2,
+        evaluate: function (args) {
+            return args[0] && args[1];
+        },
+    },
+    "chr": {
+        inputs: 1,
+        evaluate: function (args) {
+            return String.fromCharCode(args[0]);
+        },
+    },
+    "asc": {
+        inputs: 1,
+        evaluate: function (args) {
+            return args[0].charCodeAt(0);
+        },
+    },
+    "shift": {
+        inputs: 2,
+        evaluate: function (args) {
+            return String.fromCharCode(Number(args[0].charCodeAt(0))+args[1]);
         },
     },
 }
@@ -57,6 +141,8 @@ function parseWord(word, variables) {
         return constants[word];
     } else if (String(Number(word)) == word) {
         return Number(word); // Parse number
+    } else if (word.length == 1) {
+        return word; // Single character
     } else {
         let arr = [];
         for (let char of word) {
