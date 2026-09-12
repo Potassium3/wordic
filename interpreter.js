@@ -2,7 +2,14 @@ const operators = {
     "not": {
         inputs: 1,
         evaluate: function (args) {
-            return !args[0]
+            return !args[0];
+        },
+    },
+    "add": {
+        inputs: 2,
+        evaluate: function (args) {
+            console.log("ADD CALLED WITH: "+args);
+            return args[0]+args[1];
         },
     },
 }
@@ -65,13 +72,14 @@ function evaluate(arg, variables) {
     // Operator+value -> value
     // Value -> value
     // Operator+identifier -> value?
-    console.log("evaluating:"+arg);
+    console.log("Evaluating: "+arg);
 
     if (arg.length == 1) {
         // Return the single value
         return parseWord(arg[0], variables);
     } else {
         let args = [];
+        console.log("Breakdown:");
         if (arg[0] in operators) {
             // Split the words into sections, and evaluate each section
             let operator = operators[arg[0]];
@@ -83,7 +91,7 @@ function evaluate(arg, variables) {
                 if (i != 0) {
                     allArgsBefore.push(word); // Keep track of arguments
                     if (word in operators) {
-                        expectedArgs = operators[word].inputs - 1; // Additional argument expected (minus operator, which takes up one word)
+                        expectedArgs += operators[word].inputs - 1; // Additional argument expected (minus operator, which takes up one word)
                     } else {
                         expectedArgs--;
                         if (expectedArgs < initialArgs) {
@@ -93,13 +101,16 @@ function evaluate(arg, variables) {
                             allArgsBefore = [];
                         }
                     }
+                    console.log("Argument: "+word+", Expected "+expectedArgs+" more.");
                 }
                 i++;
             }
+            console.log("End breakdown:");
 
             // Return the operator's calculation
             return operator.evaluate(args);
         } else {
+            console.log("End Breakdown ERRONEUS:");
             return 0; // Hopefully this code won't run, unless the user types in two non-operators in the space of one
         }
     }
@@ -115,7 +126,6 @@ function runLine(line, variables) {
         // Format arguments to principal command (first of line)
         let args = [];
         let expectedArgs = command.inputs; // Keep track of how many args needed
-        console.log("Initial expected: "+expectedArgs);
         let initialArgs = expectedArgs;
         let i = 0;
         let allArgsBefore = [];
@@ -123,12 +133,11 @@ function runLine(line, variables) {
             if (i != 0) {
                 allArgsBefore.push(word);
                 if (word in operators) {
-                    expectedArgs += operators[word].inputs - 1; // Additional args expected - operator
+                    expectedArgs += operators[word].inputs - 1; // Additional args expected.
                 } else {
                     expectedArgs--;
                     if (expectedArgs < initialArgs) {
                         initialArgs = expectedArgs;
-                        console.log("Evaluation allowed for arg "+args.length+": "+command.evaluatingInputs[args.length]);
                         if (command.evaluatingInputs[args.length] == true) {
                             // If the argument is allowed to be evaluated by the command details
                             args.push(evaluate(allArgsBefore, variables)); // Evaluate into the *real* args list
