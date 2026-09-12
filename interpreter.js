@@ -59,6 +59,7 @@ function parseWord(word, variables) {
 
 // Recursive
 function evaluate(arg) {
+    console.log("evaluating:"+arg);
     if (arg.length == 1) {
         return arg[0]; // Error undefined
     } else {
@@ -79,20 +80,18 @@ function runLine(line, variables) {
         console.log("Initial expected: "+expectedArgs);
         let initialArgs = expectedArgs+1;
         let i = 0;
+        let allArgsBefore = [];
         for (let word of line) {
             if (i != 0) {
+                allArgsBefore.push(word);
                 if (word in operators) {
                     expectedArgs += operators[word].inputs - 1; // Additional args expected - operator
                 } else {
                     console.log("initial:"+initialArgs+" expected:"+expectedArgs);
                     if (expectedArgs < initialArgs) {
                         initialArgs = expectedArgs;
-                        
-                        let arg = [];
-                        for (let j=0; j<i; j++) {
-                            arg.push(args[j]);
-                        }
-                        args.push(evaluate(arg)); // Evaluate all words before
+                        args.push(evaluate(allArgsBefore)); // Evaluate all words before
+                        allArgsBefore = [];
                     }
                     expectedArgs--;
                 }
