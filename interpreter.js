@@ -13,24 +13,25 @@ const commands = {
         evaluatingInputs: [false, true],
         run: function(args, variables) {
             let newVariables = variables;
-            newVariables[args[0]] = parseWord(args[1], variables);
-            return [variables, ""];
+            newVariables[args[0]] = args[1];
+            return [newVariables, ""];
         }
     },
     "set": {
         inputs: 2,
+        evaluatingInputs: [false, true],
         run: function(args, variables) {
             let newVariables = variables;
-            newVariables[args[0]] = parseWord(args[1], variables);
-            return [variables, ""];
+            newVariables[args[0]] = args[1];
+            return [newVariables, ""];
         }
     },
     "out": {
         inputs: 1,
+        evaluatingInputs: [true],
         run: function(args, variables) {
             let newVariables = variables;
-            let output = parseWord(args[0], variables);
-
+            let output = args[0];
             return [newVariables, output];
         }
     },
@@ -59,7 +60,7 @@ function parseWord(word, variables) {
 }
 
 // Recursive
-function evaluate(arg) {
+function evaluate(arg, variables) {
     // Identifier -> identifier
     // Operator+value -> value
     // Value -> value
@@ -67,33 +68,39 @@ function evaluate(arg) {
     console.log("evaluating:"+arg);
 
     if (arg.length == 1) {
-        // Return the single text value
-        return parseWord(arg[0]);
+        // Return the single value
+        return parseWord(arg[0], variables);
     } else {
         let args = [];
         if (arg[0] in operators) {
             // Split the words into sections, and evaluate each section
             let operator = operators[arg[0]];
             let expectedArgs = operator.inputs;
-            let initialArgs = expectedArgs; // Simply a formula thing
+            let initialArgs = expectedArgs;
             let allArgsBefore = [];
+            let i = 0;
             for (let word of arg) {
-                allArgsBefore.push(word); // Keep track of arguments
-                if (word in operators) {
-                    expectedArgs = operators[word].inputs - 1; // Additional argument expected (minus operator, which takes up one word)
-                } else {
-                    if (expectedArgs < initialArgs) {
-                        // As soon as one whole argument is ended, store in args
-                        initialArgs = expectedArgs;
-                        args.push(evaluate(allArgsBefore));
-                        allArgsBefore = [];
+                if (i != 0) {
+                    allArgsBefore.push(word); // Keep track of arguments
+                    if (word in operators) {
+                        expectedArgs = operators[word].inputs - 1; // Additional argument expected (minus operator, which takes up one word)
+                    } else {
+                        expectedArgs--;
+                        if (expectedArgs < initialArgs) {
+                            // As soon as one whole argument is ended, store in args
+                            initialArgs = expectedArgs;
+                            args.push(evaluate(allArgsBefore, variables));
+                            allArgsBefore = [];
+                        }
                     }
-                    expectedArgs--;
                 }
+                i++;
             }
 
             // Return the operator's calculation
             return operator.evaluate(args);
+        } else {
+            return 0; // Hopefully this code won't run, unless the user types in two non-operators in the space of one
         }
     }
 }
@@ -109,7 +116,7 @@ function runLine(line, variables) {
         let args = [];
         let expectedArgs = command.inputs; // Keep track of how many args needed
         console.log("Initial expected: "+expectedArgs);
-        let initialArgs = expectedArgs+1;
+        let initialArgs = expectedArgs;
         let i = 0;
         let allArgsBefore = [];
         for (let word of line) {
@@ -118,13 +125,19 @@ function runLine(line, variables) {
                 if (word in operators) {
                     expectedArgs += operators[word].inputs - 1; // Additional args expected - operator
                 } else {
-                    console.log("initial:"+initialArgs+" expected:"+expectedArgs);
+                    expectedArgs--;
                     if (expectedArgs < initialArgs) {
                         initialArgs = expectedArgs;
-                        args.push(evaluate(allArgsBefore)); // Evaluate all words before
-                        allArgsBefore = [];
+                        console.log("Evaluation allowed for arg "+args.length+": "+command.evaluatingInputs[args.length]);
+                        if (command.evaluatingInputs[args.length] == true) {
+                            // If the argument is allowed to be evaluated by the command details
+                            args.push(evaluate(allArgsBefore, variables)); // Evaluate into the *real* args list
+                            allArgsBefore = [];
+                        } else {
+                            args.push(allArgsBefore[0]);
+                            allArgsBefore = [];
+                        }
                     }
-                    expectedArgs--;
                 }
                 console.log("Argument: "+word+", Expected "+expectedArgs+" more.");
             }
@@ -132,6 +145,7 @@ function runLine(line, variables) {
         }
 
         // Run command
+        console.log("Running the command "+principalCommand+" with arguments "+JSON.stringify(args));
         let result = command.run(args, variables); // Runs the line
         newVariables = result[0];
         output = result[1];
