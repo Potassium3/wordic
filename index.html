@@ -48,7 +48,7 @@
         }
 
         div.editor {
-          width: 62vw;
+          width: 62%;
           position: relative;
           height: 100%;
           border-radius: 10px;
@@ -180,16 +180,34 @@
           font-size: 15pt;
           z-index: 1000;
           flex-grow: 1;
+          overflow: auto;
         }
 
         div.output-value {
           padding: 15px;
         }
 
-        div.output-value>div {
-          display: inline;
-          border: 1px solid var(--brown);
+        div.output-value div.arr {
+          display: flex;
+          width: fit-content;
+          height: fit-content;
+          flex-direction: row;
+          background-color: #ffffff22;
+          border-radius: 10px;
+          padding: 5px;
+          gap: 5px;
+        }
+
+        div.output-value div.arritem {
+          width: fit-content;
+          height: fit-content;
+          background-color: var(--back);
           border-radius: 5px;
+          padding: 2px;
+        }
+
+        div.arritem div.arr {
+          flex-direction: column !important;
         }
 
         button.square {
@@ -276,10 +294,10 @@
     </div>
     <script src="interpreter.js"></script>
     <script>
-
       function render(containertext) {
+        window.localStorage.setItem("saved", containertext);
         let text = containertext + "\n";
-        const blue = ["add", "minus", "times", "over", "round", "decimal", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "array", "wrap", "take", "replace", "steal", "length", "join", "string"];
+        const blue = ["add", "minus", "times", "over", "round", "div", "decimal", "mod", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "array", "wrap", "take", "replace", "steal", "length", "join", "firstof"];
         const green = ["out", "new", "set"];
         const red = ["function", "process", "calc", "run", "return"];
         const yellow = ["repeat", "while", "count", "search", "if"];
@@ -351,11 +369,18 @@
       document.getElementById("code").addEventListener("input", (function() {
         render(this.value);
       }));
-      render(document.getElementById("code").value);
 
       document.getElementById("run").addEventListener("click", (function() {
         document.getElementById("output-value").innerHTML = run(document.getElementById("code").value+"\n");
       }));
+
+      if (window.localStorage.getItem("saved")) {
+        let stored = window.localStorage.getItem("saved");
+        document.getElementById("code").value = stored;
+        render(stored);
+      } else {
+        render(document.getElementById("code").value);
+      }
       
     </script>
   </body>

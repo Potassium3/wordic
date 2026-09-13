@@ -34,11 +34,25 @@ const operators = {
             return args[0]%1;
         },
     },
+    "div": {
+        inputs: 2,
+        evaluatingInputs: [true, true],
+        evaluate: function (args) {
+            return Math.floor(args[0]/args[1]);
+        },
+    },
     "decimal": {
         inputs: 1,
         evaluatingInputs: [true],
         evaluate: function (args) {
             return args[0]%1;
+        },
+    },
+    "mod": {
+        inputs: 2,
+        evaluatingInputs: [true, true],
+        evaluate: function (args) {
+            return args[0]%args[1];
         },
     },
     "exp": {
@@ -240,6 +254,7 @@ const operators = {
             }
         },
     },
+    // Firstof for arrays needed here
 }
 
 const commands = {
@@ -264,23 +279,23 @@ const commands = {
     "out": {
         inputs: 1,
         evaluatingInputs: [true],
-        run: function(args, variables) {
+        run: function(args, variables, newline=true) {
             let newVariables = variables;
-            let output;
+            let output = "";
             if (args[0] == null) {
-                output = "<span class='tx-g'>nothing</span>"
+                output = `<span class="tx-g">nothing</span>`;
             } else if (typeof args[0] == "number") {
-                output = args[0];
+                output = String(args[0]);
             } else if (typeof args[0] == "string") { // char
                 output = args[0];
-            } else if (typeof args[0] == "bool") {
-                output = args[0] ? "true" : "not true";
+            } else if (typeof args[0] == "boolean") {
+                output = args[0] ? `<span class="tx-g">true</span>` : `<span class="tx-a">not</span> <span class="tx-g">true</span>`;
             } else {
-                output = "";
                 for (let item of args[0]) {
-                    output += "<div>"+this.run([item], variables)[1]+"</div>";
+                    output += this.run([item], variables, false)[1];
                 }
             }
+            output += newline ? "<br>" : "";
             return [newVariables, output];
         }
     },
@@ -486,7 +501,5 @@ function run(wordic) {
         }
         i++;
     }
-    let returning = "Variables: "+JSON.stringify(variables);
-    returning += "\nOutput: "+output;
-    return returning;
+    return output;
 }
