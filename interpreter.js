@@ -261,25 +261,25 @@ const commands = {
     "new": {
         inputs: 2,
         evaluatingInputs: [false, true],
-        run: function(args, variables) {
+        run: function(args, variables, stack, line, functions) {
             let newVariables = variables;
             newVariables[args[0]] = args[1];
-            return [newVariables, ""];
-        }
+            return [newVariables, "", stack, line+1, functions, false];
+        },
     },
     "set": {
         inputs: 2,
         evaluatingInputs: [false, true],
-        run: function(args, variables) {
+        run: function(args, variables, stack, line, functions) {
             let newVariables = variables;
             newVariables[args[0]] = args[1];
-            return [newVariables, ""];
-        }
+            return [newVariables, "", stack, line+1, functions, false];
+        },
     },
     "out": {
         inputs: 1,
         evaluatingInputs: [true],
-        run: function(args, variables, newline=true) {
+        run: function(args, variables, stack, line, functions, newline=true) {
             let newVariables = variables;
             let output = "";
             if (args[0] == null) {
@@ -292,34 +292,47 @@ const commands = {
                 output = args[0] ? `<span class="tx-g">true</span>` : `<span class="tx-a">not</span> <span class="tx-g">true</span>`;
             } else {
                 for (let item of args[0]) {
-                    output += this.run([item], variables, false)[1];
+                    output += this.run([item], variables, stack, line, functions, false)[1];
                 }
             }
             output += newline ? "<br>" : "";
-            return [newVariables, output];
-        }
+            return [newVariables, output, stack, line+1, functions, false];
+        },
     },
-}
-
-// New code
-const constructs = {
-    "repeat": {
+    "function": {
+        inputs: 2,
+        evaluatingInputs: [false, false],
+        run: function(args, variables, stack, line, functions) {
+            let newVariables = variables;
+            functions[args[0]] = line;
+            return [newVariables, "", stack, line+1, functions, true]; // true - skip executing body of function before call
+        },
+    },
+    "calc": {
         inputs: 1,
         evaluatingInputs: [true],
-        run: function(args, variables, stack, line) {
-            newStack = structuredClone(stack);
+        run: function(args, variables, stack, line, functions) {
+            let newVariables = {}; // No accessible variables outside function
+            let newLine = functions[args[0]];
+            let newStack = structuredClone(stack);
             newStack.push({
-                type: "iteration",
                 call: line,
-                end: function() {
-                    // If loop has finished, do nothing, else put currentline back to call line
-                    return {goBackTo: this.call, popStack: false};
-                },
-                count: args[0],
-            });
-            return newStack;
+                hiddenvariables: variables,
+            })
+            return [newVariables, "", newStack, newLine, functions, false];
         },
-    }
+    },
+    "return": {
+        inputs: 0,
+        evaluatingInputs: [],
+        run: function(args, variables, stack, line, functions) {
+            let lastCall = stack[stack.length-1];
+            let newStack = stack.pop();
+            let newLine = lastCall.call;
+            let newVariables = lastCall.variables; // Not accessible outside function - scope
+            return [newVariables, "", newStack, newLine, functions, false];
+        },
+    },
 }
 
 const constants = {
@@ -414,11 +427,16 @@ function evaluate(arg, variables) {
     }
 }
 
-function runLine(line, variables) {
+function runLine(line, variables, stack, functions, skipFlag, lineNumber) {
     let newVariables = structuredClone(variables);
     let principalCommand = line[0];
     let output = "";
-    if (principalCommand in commands) {
+    let newStack = structuredClone(stack);
+    let newFunctions = structuredClone(functions);
+    let newSkipFlag = skipFlag;
+    let newLine = lineNumber;
+
+    if (skipFlag == 0 && principalCommand in commands) {
         let command = commands[principalCommand];
 
         // Format arguments to principal command (first of line)
@@ -453,10 +471,14 @@ function runLine(line, variables) {
 
         // Run command
         console.log("Running the command "+principalCommand+" with arguments "+JSON.stringify(args));
-        let result = command.run(args, variables); // Runs the line
+        let result = command.run(args, variables, stack, lineNumber, functions); // Runs the line
         newVariables = result[0];
         output = result[1];
-    } else if (principalCommand == "note") {
+        newStack = result[2];
+        newLine = result[3];
+        newFunctions = result[4];
+        newSkipFlag = result[5] ? 1 : 0;
+    } else if (newSkipFlag == 0 && principalCommand == "note") {
         let note = [];
         let i = 0;
         for (let word of line) {
@@ -470,21 +492,29 @@ function runLine(line, variables) {
             i++;
         }
         note.pop(); // Remove extra space
+        newLine = lineNumber+1;
         newVariables["noted"] = note; // Store a note in a special variable called "noted" (it's a reserved name anyway)
+    } else if (newSkipFlag != 0) {
+        if (["end", "return"].includes(principalCommand)) {
+            newSkipFlag--;
+        } else if (["function", "process", "repeat", "while", "count", "search", "if"].includes(principalCommand)) {
+            newSkipFlag++;
+        }
+        newLine = lineNumber+1;
     } else {
         // Error command unrecognised
     }
-    return { variables: newVariables, output };
+    return { variables: newVariables, output, newLine, newSkipFlag, newStack, newFunctions };
 }
 
 function run(wordic) {
-    let variables = {noted: [],}; // Reserved variable name for comments
 
     let output = "";
     let len = wordic.length;
     let word = "";
     let line = [];
     let i = 0;
+    let code = []
     for (let char of wordic) {
         if (char == " " || char == "\n" || i==len-1) {
             line.push(word);
@@ -494,12 +524,31 @@ function run(wordic) {
         }
         if (char == "\n" || i==len-1) {
             // Run the line
-            let result = runLine(line, variables);
-            output += result.output;
-            variables = result.variables;
+            code.push(line);
             line = [];
         }
         i++;
+    }
+
+
+    let lineNumber = 0;
+    let stack = [];
+    let variables = {noted: [],}; // Reserved variable name for comments
+    let functions = {}; // Table of line numbers of functions
+    let skipFlag = 0;
+    let result;
+    while (lineNumber != code.length) {
+        line = code[lineNumber];
+        console.log("LN:"+lineNumber);
+        console.log("LINE:"+line);
+        result = runLine(line, variables, stack, functions, skipFlag, lineNumber);
+
+        variables = result.variables;
+        output += result.output;
+        lineNumber = result.newLine;
+        skipFlag = result.newSkipFlag;
+        stack = result.stack;
+        functions = result.newFunctions;
     }
     return output;
 }
