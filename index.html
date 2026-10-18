@@ -9,6 +9,7 @@
           font-size: 15pt;
           line-height: 22px;
           caret-color: white;
+          scrollbar-width: none;
         }
         html, body {
           margin: 0;
@@ -17,15 +18,19 @@
           color: white;
           width: 100%;
           height: 100%;
-          --blue: #03d3fc;
-          --green: #08ff63;
-          --red: #ff0038;
-          --yellow: #ffd700;
-          --grey: #949fa4;
-          --brown: #ffcb90;
-          --back: #2d2d2d;
+          --blue:      #03d3fc;
+          --green:     #08ff63;
+          --yellow:    #ffd700;
+          --beige:     #ffe3b2;
+          --red:       #ff0038;
+          --purple:    #d2a7fa;
+          --error-red: #ba0000;
+          --back-red:  #410f0f;
+          --grey:      #949fa4;
+          --lightgrey: #444444;
+          --back:      #2d2d2d;
 
-          --tool-height: 80px;
+          --tool-height: 50px;
         }
 
         h1 {
@@ -35,6 +40,12 @@
           text-align: center;
           margin: 0;
           padding: 20px 0 0;
+        }
+
+        p {
+          line-height: 15px;
+          font-size: 9pt !important;
+          margin: 0;
         }
 
         div.workspace {
@@ -48,10 +59,12 @@
         }
 
         div.editor {
-          width: 62%;
+          width: 0;
+          flex-basis: 0;
+
           position: relative;
           height: 100%;
-          border-radius: 10px;
+          border-radius: 15px;
           margin: 0;
           outline: none;
           border: none;
@@ -60,6 +73,7 @@
           background-color: var(--back);
           font-size: 15pt;
           z-index: 1000;
+          flex-grow: 1.6;
           overflow-x: auto;
           overflow-y: auto;
         }
@@ -77,6 +91,7 @@
           background-color: var(--back);
           overflow-x: auto;
           box-shadow: 0px 0 5px black;
+          scrollbar-width: none;
         }
 
         .ide {
@@ -96,7 +111,7 @@
           width: fit-content;
           height: fit-content;
           field-sizing: content;
-          color: transparent; /* .code is overlayed by .coloured*/
+          color: transparent; /* transparent .code overlays .coloured*/
           background-color: transparent;
           
           z-index: 2;
@@ -110,6 +125,11 @@
           
           min-width: calc(100% - 50px);
           min-height: 100%;
+          font-family: inherit;
+          font-size: inherit;
+          line-height: inherit;
+
+          resize: none;
         }
 
         .coloured {
@@ -118,6 +138,8 @@
           left: 50px;
           width: fit-content;
           height: fit-content;
+          min-width: calc(100% - 50px);
+          min-height: 100%;
           
           z-index: 1;
           white-space: pre;
@@ -125,11 +147,19 @@
           padding-left: 10px;
           padding-bottom: 100px;
           padding-top: 0;
+          cursor: pointer;
+          border-bottom-right-radius: 15px;
         }
 
         .coloured>div {
           display: block;
           min-height: 22px;
+          border-radius: 5px;
+          width: fit-content;
+        }
+
+        .coloured>div.red {
+          background-color: var(--error-red);
         }
 
         .numbers {
@@ -137,13 +167,45 @@
           left: 0;
           width: 50px;
           height: fit-content;
+          min-height: 100%;
           z-index: 3;
           background-color: var(--back);
           opacity: 0.95;
           text-align: right;
           padding-right: 5px;
+          padding-bottom: 100px;
           color: #ffffff66;
           user-select: none;
+        }
+
+        div#pointer {
+          position: absolute;
+          right: 0;
+          width: 11px;
+          height: 22px;
+          transform: translateX(50%) translateY(-50%) scale(0.5);
+          background-color: #ffffff;
+          clip-path: polygon(0 0, 100% 50%, 0 100%);
+          z-index: 6;
+          transition: top 0.2s;
+        }
+
+        div#callers {
+          position: absolute;
+          right: 0;
+          width: 11px;
+          height: 100%;
+          z-index: 5;
+        }
+
+        div.caller {
+          position: absolute;
+          right: 0;
+          width: 11px;
+          height: 22px;
+          transform: translateX(50%) scale(0.5);
+          background-color: #888888;
+          clip-path: polygon(0 0, 100% 50%, 0 100%);
         }
 
         div.slider {
@@ -168,47 +230,119 @@
           background-color: white;
         }
 
-        div.output {
+        div.results {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+
+          flex-basis: 0;
           height: 100%;
-          border-radius: 10px;
+
           margin: 0;
           outline: none;
           border: none;
           resize: none;
           color: white;
-          background-color: var(--back);
           font-size: 15pt;
           z-index: 1000;
           flex-grow: 1;
-          overflow: auto;
         }
 
-        div.output-value {
+        div.output {
+          position: relative;
+          border-radius: 15px;
+          background-color: var(--back);
+          overflow: auto;
+          scrollbar-width: auto;
+          width: 100%;
+          height: 100%;
+        }
+
+        div#errors {
+          position: relative;
+          overflow: auto;
+          
+          border-radius: 15px;
+          background-color: var(--back);
+          overflow-y: auto;
+          scrollbar-width: auto;
+          width: 300px;
+          height: 150px;
+        }
+
+        div#errors.red {
+          background-color: var(--back-red) !important;
+        }
+
+        div#errors>div {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: fit-content;
+          height: fit-content;
           padding: 15px;
         }
 
-        div.output-value div.arr {
-          display: flex;
-          width: fit-content;
-          height: fit-content;
-          flex-direction: row;
-          background-color: #ffffff22;
-          border-radius: 10px;
-          padding: 5px;
-          gap: 5px;
+        div.output-value {
+          position: absolute;
+          top: var(--tool-height);
+          left: 0;
+          width: 100%;
+          height: calc(100% - calc(2 * var(--tool-height)));
+          overflow: auto;
+          padding: 15px;
+          padding-top: 0;
+          white-space: pre;
+          box-shadow: inset 0 -5px 5px -5px black;
         }
 
-        div.output-value div.arritem {
-          width: fit-content;
-          height: fit-content;
-          background-color: var(--back);
-          border-radius: 5px;
-          padding: 2px;
+        input.input-value {
+          display: none;
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          width: calc(100% - 20px);
+          height: var(--tool-height);
+          overflow: auto;
+          padding: 15px;
+          padding-left: 35px;
+          white-space: pre;
+          background-color: #000000;
+          color: white;
+          border: none;
+          border-radius: 999px;
+          animation: input-pop-up 0.2s forwards;
+          z-index: 1;
         }
 
-        div.arritem div.arr {
-          flex-direction: column !important;
+        div.input-arrow {
+          display: none;
+          position: absolute;
+          bottom: 25px;
+          left: 25px;
+          width: 20px;
+          height: 20px;
+          white-space: pre;
+          color: var(--green);
+          z-index: 999;
         }
+
+        .output:has(.input-value) div.input-arrow {
+          display: block;
+        }
+
+        @keyframes input-pop-up {
+          0% {
+            transform: translateY(10px);
+          }
+          100% {
+            transform: translateY(0);
+          }
+        }
+
+        /*input.input-value::before {
+          content: ">";
+        }*/
 
         button.square {
           display: block;
@@ -226,6 +360,11 @@
 
         button.square:hover {
           background-color: #ffffff22;
+        }
+
+        span {
+          font-size: inherit;
+          line-height: inherit;
         }
 
         .tx-a {
@@ -258,9 +397,15 @@
           z-index: 2;
         }
 
-        .tx-g {
+        .tx-h {
           display: inline-block;
-          color: var(--brown);
+          color: var(--purple);
+          z-index: 2;
+        }
+
+        .tx-l {
+          display: inline-block;
+          color: var(--lightgrey);
           z-index: 2;
         }
     </style>
@@ -273,114 +418,40 @@
           <button class="square">Identifiers</button>
           <button class="square"><div class="tx-s">Commands</div></button>
           <button class="square"><div class="tx-a">Operators</div></button>
-          <button class="square"><div class="tx-g">Constants</div></button>
+          <button class="square"><div class="tx-h">Constants</div></button>
           <button class="square"><div class="tx-d">Constructs</div></button>
           <button class="square"><div class="tx-f">Functions</div></button>
           <button class="square"><div class="tx-b">Comments</div></button>
         </div>
         <div id="ide" class="ide">
-          <textarea id="code" class="code" contenteditable>new a zero</textarea>
+          <textarea id="code" class="code" contenteditable></textarea>
           <div id="coloured" class="coloured"></div>
-          <div id="numbers" class="numbers"></div>
+          <div id="numbers" class="numbers"><div id="pointer"></div><div id="callers"></div></div>
         </div>
       </div>
       <div class="slider">
         <div class="slider-decor"></div>
       </div>
-      <div class="output">
-        <button id="run" class="square">Run</button>
-        <div id="output-value" class="output-value"></div>
+      <div class="results">
+        <div class="output">
+          <div id="outputtools" class="tools">
+            <button id="run" class="square"><span class="tx-s">Run</span></button>
+          </div>
+          <div id="output-value" class="output-value"></div>
+          <div id="input-arrow" class="input-arrow">&gt;</div>
+        </div>
+        <div id="errors">
+          <div>
+            <div><span id="error-line" class="tx-f">0</span> &middot; <span id="error-code"><span class="tx-b">NO ERRORS</span></span></div>
+            <p id="error-message"><span class="tx-b">No errors found yet.</span></p>
+            <p id="error-tip"><span class="tx-b">Tip: No errors in future please.</span></p>
+          </div>
+        </div>
       </div>
     </div>
-    <script src="interpreter.js"></script>
+    <script src="script.js"></script>
     <script>
-      function render(containertext) {
-        window.localStorage.setItem("saved", containertext);
-        let text = containertext + "\n";
-        const blue = ["add", "minus", "times", "over", "round", "div", "decimal", "mod", "exp", "asc", "equal", "up", "down", "not", "or", "and", "char", "num", "bool", "shift", "chr", "array", "wrap", "take", "replace", "steal", "length", "join", "firstof"];
-        const green = ["out", "new", "set"];
-        const red = ["function", "process", "calc", "run", "return"];
-        const yellow = ["repeat", "while", "count", "search", "if"];
-        const grey = ["note", "end"];
-        const brown = ["space", "newline", "tab", "alpha", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "nothing", "pi", "true", "case", "noted", "in"];
-
-        let line = "";
-        let word = "";
-        let include = false;
-        let lineCount = 0;
-        
-        let previousLineCount = document.getElementById("numbers").dataLines || 0;
-        let len = text.length;
-        let i = 0;
-        for (let char of text) {
-          if (char == " " || char == "\n" || i==len-1) {
-            if (blue.includes(word)) {
-              line += `<span class="tx-a">${word}</span>`
-            } else if (green.includes(word)) {
-              line += `<span class="tx-s">${word}</span>`
-            } else if (red.includes(word)) {
-              line += `<span class="tx-f">${word}</span>`
-            } else if (yellow.includes(word)) {
-              line += `<span class="tx-d">${word}</span>`
-            } else if (grey.includes(word)) {
-              line += `<span class="tx-b">${word}</span>`
-            } else if (brown.includes(word)) {
-              line += `<span class="tx-g">${word}</span>`
-            } else {
-              line += word;
-            }
-            if (char == " ") {
-              line += char;
-            }
-            word = "";
-          } else {
-            word += char;
-          }
-          if (char == "\n" || i==len-1) {
-            lineCount++;
-            if (document.getElementById(`line-${lineCount}`)) {
-              if (document.getElementById(`line-${lineCount}`).innerHTML != line) {
-                document.getElementById(`line-${lineCount}`).innerHTML = line;
-              }
-            } else {
-              document.getElementById("coloured").innerHTML += `<div id="line-${lineCount}">${line}</div>`;
-            }
-            if (lineCount > previousLineCount) {
-              document.getElementById("numbers").innerHTML += `<div id="number-${lineCount}">${lineCount}</div>`;
-            }
-            line = "";
-          }
-          i++;
-        }
-
-        document.getElementById("numbers").dataLines = lineCount;
-        while (previousLineCount > lineCount) {
-          document.getElementById(`number-${previousLineCount}`).remove();
-          document.getElementById(`line-${previousLineCount}`).remove();
-          previousLineCount--;
-        }
-        document.getElementById("numbers").dataLines = lineCount;
-
-        if (containertext == "") {
-          document.getElementById("coloured").innerHTML = `<div id="line-1"><span class="tx-b">Start typing here</span></div>`;
-        }
-      }
-
-      document.getElementById("code").addEventListener("input", (function() {
-        render(this.value);
-      }));
-
-      document.getElementById("run").addEventListener("click", (function() {
-        document.getElementById("output-value").innerHTML = run(document.getElementById("code").value+"\n");
-      }));
-
-      if (window.localStorage.getItem("saved")) {
-        let stored = window.localStorage.getItem("saved");
-        document.getElementById("code").value = stored;
-        render(stored);
-      } else {
-        render(document.getElementById("code").value);
-      }
+      
       
     </script>
   </body>
